@@ -304,7 +304,7 @@ function fishLogic(timeDelta, timestamp) {
 		
 		case 1:
 			
-			if(player_size > 5) level_state = 3;
+			if(player_size > (5 + player_level / 8)) level_state = 3;
 			
 			//-----------------------------------------------------------------------------
 			//add fish
