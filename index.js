@@ -572,8 +572,6 @@ function fishLogic(timeDelta, timestamp) {
 		case 2:
 			//game over
 			gameover = 1;
-			player_level = 1;
-			player_score = 0;
 			scene.remove(fish[0]);
 			
 			elementMarque.innerHTML = " GameOver: Press ENTER to replay ";
@@ -581,6 +579,8 @@ function fishLogic(timeDelta, timestamp) {
 			if(keys.enter == true){
 				scene.add(fish[0]);
 				gameover = 0;
+				player_level = 1;
+				player_score = 0;
 				level_state = 0;
 				elementMarque.innerHTML = " GO: Green < Yellow < Orange < Red ";
 			}
