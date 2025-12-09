@@ -2,7 +2,7 @@ CS 559 GROUP PROJECT: SOLO GROUP, NOAH SCOTT, CODE: 0728
 
 Feeding Frenzy (Fish Game)
 
-ENTER to start, WASD to move, SPACE to sink and rise, ARROW LEFT/RIGHT to move camera
+ENTER to start, WASD to move, ARROW UP to rise, ARROW LEFT/RIGHT to move camera
 
 Eat the fish on your tier or lower to grow larger (green < yellow < orange < red), once you grow large enough you move to the next level.
 
