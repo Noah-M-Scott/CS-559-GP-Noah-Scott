@@ -16,7 +16,7 @@ renderer.domElement.id = "canvas";
 const elementLevel = document.getElementById("level");
 const elementScore = document.getElementById("score");
 const elementHighScore = document.getElementById("highscore");
-const elementState = document.getElementById("state");
+const elementMarque = document.getElementById("marque");
 
 let scene = new T.Scene();
 scene.background = new T.Color(0x0022AA);
@@ -248,8 +248,19 @@ let player_size = 1;
 let player_score = 0;
 let player_highscore = 0;
 let player_level = 1;
-let level_state = 0;
+let level_state = 2;
 let gameover = 0;
+
+const keys = {
+    w: false,
+    a: false,
+    s: false,
+    d: false,
+	' ': false,
+	enter: false,
+	arrowleft: false,
+	arrowright: false
+};
 
 let active_fish_ids = [];
 let active_urchin_ids = [];
@@ -297,7 +308,7 @@ function fishLogic(timeDelta, timestamp) {
 			
 			//-----------------------------------------------------------------------------
 			//add fish
-			if(Math.random() < 0.05 * player_level && active_fish_ids.length < 16){
+			if(Math.random() < 0.025 * player_level && active_fish_ids.length < 16){
 				//spawn urchin
 				let chosenId = -1;
 				for(let i = 1; i < 17; i++)
@@ -309,7 +320,7 @@ function fishLogic(timeDelta, timestamp) {
 					active_fish_ids.push(chosenId);
 					scene.add(fish[chosenId]);
 					
-					fishSize[chosenId] = 0.5 + Math.random() * 1.75 * player_level;
+					fishSize[chosenId] = 0.5 + Math.random() * 1.125 * player_level;
 					
 					fishVel[chosenId].x = Math.random() * 2.0 - 1.0;
 					fishVel[chosenId].y = Math.random() * 2.0 - 1.0;
@@ -377,6 +388,25 @@ function fishLogic(timeDelta, timestamp) {
 				let adhereAmount = 0.22;
 				let alignAmount = 0.12;
 				
+				let bigFish = Math.round(Math.max(0, Math.min(3, player_size - 1))) < Math.round(Math.max(0, Math.min(3, fishSize[active_fish_ids[i]] - 1)));
+				
+				if(bigFish){
+					const fishPosition = new T.Vector3();
+					fishPosition.copy(fish[0].position).sub(fish[active_fish_ids[i]].position)
+					
+					let dist = fishPosition.length();
+					
+					if(dist < 12.0){
+						fishPosition.normalize();
+						
+						let effect = Math.min(0.635, player_level / 4.0);
+						
+						alignX = alignX * (1.0 - effect) + fishPosition.x * effect;
+						alignY = alignY * (1.0 - effect) + fishPosition.y * effect;
+						alignZ = alignZ * (1.0 - effect) + fishPosition.z * effect;
+					}
+				}
+				
 				fishVel[active_fish_ids[i]].x = fishVel[active_fish_ids[i]].x * (1.0 - adhereAmount - alignAmount - avoidAmount) + alignX * alignAmount + avoidX * avoidAmount + adhereX * adhereAmount;
 				fishVel[active_fish_ids[i]].y = fishVel[active_fish_ids[i]].y * (1.0 - adhereAmount - alignAmount - avoidAmount) + alignY * alignAmount + avoidY * avoidAmount + adhereY * adhereAmount;
 				fishVel[active_fish_ids[i]].z = fishVel[active_fish_ids[i]].z * (1.0 - adhereAmount - alignAmount - avoidAmount) + alignZ * alignAmount + avoidZ * avoidAmount + adhereZ * adhereAmount;
@@ -409,8 +439,8 @@ function fishLogic(timeDelta, timestamp) {
 				
 				//fish eats/is eaten
 				const dist = new T.Vector3();
-				if( dist.copy(fish[active_fish_ids[i]].position).sub(fish[0].position).length() < 1.25 * 0.75 * Math.max(fishSize[active_fish_ids[i]], player_size) ){
-					if( Math.round(player_size) < Math.round(fishSize[active_fish_ids[i]])){
+				if( dist.copy(fish[active_fish_ids[i]].position).sub(fish[0].position).length() < 1.125 * 0.75 * Math.max(fishSize[active_fish_ids[i]], player_size) ){
+					if( bigFish ){
 						level_state = 2;
 						return;
 					}else{
@@ -426,7 +456,7 @@ function fishLogic(timeDelta, timestamp) {
 			
 			//-----------------------------------------------------------------------------
 			//add silver bubbles
-			if(Math.random() < 0.005 / (player_level * 0.5) && active_sbubble_ids.length < 16){
+			if(Math.random() < 0.01 / Math.max(1.0, player_level / 4.0) && active_sbubble_ids.length < 16){
 				let chosenId = -1;
 				for(let i = 0; i < 16; i++)
 				if(!active_sbubble_ids.includes(i)){
@@ -440,14 +470,14 @@ function fishLogic(timeDelta, timestamp) {
 				}
 			}
 			
-			//gold silver logic
+			//silver logic
 			for(let i = 0; i < active_sbubble_ids.length; i++){
 				sbubbles[active_sbubble_ids[i]].position.y += timeDelta * 5.0;
 				//add points
 				const dist = new T.Vector3();
 				if( dist.copy(sbubbles[active_sbubble_ids[i]].position).sub(fish[0].position).length() < Math.max(2.0, 1.75 * 0.75 * player_size) ){
 					player_score += 100 * player_level;
-					player_size += 0.1 * player_level;
+					player_size += 0.05 * player_level;
 					scene.remove(sbubbles[active_sbubble_ids[i]])
 					active_sbubble_ids.splice(i, 1);
 				}
@@ -461,7 +491,7 @@ function fishLogic(timeDelta, timestamp) {
 			
 			//-----------------------------------------------------------------------------
 			//add gold bubbles
-			if(Math.random() < 0.0025 / (player_level * 0.5) && active_gbubble_ids.length < 16){
+			if(Math.random() < 0.005 / Math.max(1.0, player_level / 4.0) && active_gbubble_ids.length < 16){
 				let chosenId = -1;
 				for(let i = 0; i < 16; i++)
 				if(!active_gbubble_ids.includes(i)){
@@ -482,7 +512,7 @@ function fishLogic(timeDelta, timestamp) {
 				const dist = new T.Vector3();
 				if( dist.copy(gbubbles[active_gbubble_ids[i]].position).sub(fish[0].position).length() < Math.max(2.0, 1.75 * 0.75 * player_size) ){
 					player_score += 500 * player_level;
-					player_size += 0.2 * player_level;
+					player_size += 0.1 * player_level;
 					scene.remove(gbubbles[active_gbubble_ids[i]])
 					active_gbubble_ids.splice(i, 1);
 				}
@@ -524,7 +554,7 @@ function fishLogic(timeDelta, timestamp) {
 				
 				//urchin kills player
 				const dist = new T.Vector3();
-				if( dist.copy(urchins[active_urchin_ids[i]].position).sub(fish[0].position).length() < Math.max(2.0, 1.75 * 0.75 * player_size) ){
+				if( dist.copy(urchins[active_urchin_ids[i]].position).sub(fish[0].position).length() < Math.max(2.0, 1.125 * 0.75 * player_size) ){
 					level_state = 2;
 					return;
 				}
@@ -541,9 +571,20 @@ function fishLogic(timeDelta, timestamp) {
 		
 		case 2:
 			//game over
-			level_state = 0;
+			gameover = 1;
 			player_level = 1;
 			player_score = 0;
+			scene.remove(fish[0]);
+			
+			elementMarque.innerHTML = " GameOver: Press ENTER to replay ";
+			
+			if(keys.enter == true){
+				scene.add(fish[0]);
+				gameover = 0;
+				level_state = 0;
+				elementMarque.innerHTML = " GO: Green < Yellow < Orange < Red ";
+			}
+			
 			break;
 		
 		case 3:
@@ -573,17 +614,6 @@ main_camera.lookAt(0, 0, 0);
 
 
 //-----------------------------------------------------------------------------
-const keys = {
-    w: false,
-    a: false,
-    s: false,
-    d: false,
-	' ': false,
-	enter: false,
-	arrowleft: false,
-	arrowright: false
-};
-
 renderer.render(scene, main_camera);
 
 let vel = new T.Vector3(0, 0, 0);
@@ -609,44 +639,43 @@ function animate(timestamp) {
 	right.x *= timeDelta;
 	right.z *= timeDelta;	
 	
-	vel.y -= 0.01;
-	
-	
-	if (keys.w)
-		vel.add(forward);
-	if (keys.s)
-		vel.sub(forward);
-	if (keys.a)
-		vel.add(right);
-	if (keys.d)
-		vel.sub(right);
-	if (keys[' '])
-		vel.y += 0.05;
-	
-	
-	if(vel.length() > 0.25)
-		vel.normalize().multiplyScalar(0.25);
-	
-	const targetPosition = new T.Vector3();
-	const targetVector = new T.Vector3();
-	targetVector.copy(vel).normalize();
-	targetPosition.copy(fish[0].position).add(targetVector);
-	
-	fish[0].lookAt(targetPosition);
-	
-	fish[0].position.add(vel);
-	vel.multiplyScalar(1.0 - timeDelta * 6.0);
-	
-	
-	if(fish[0].position.length() > 25.0){
-		const fishPosition = new T.Vector3();
-		fishPosition.copy(fish[0].position).normalize().multiplyScalar(25.0)
-		
-		fish[0].position.set(fishPosition.x, fishPosition.y, fishPosition.z);
-	}
-	
-	
 	if(gameover == false){
+		vel.y -= 0.01;
+		
+		
+		if (keys.w)
+			vel.add(forward);
+		if (keys.s)
+			vel.sub(forward);
+		if (keys.a)
+			vel.add(right);
+		if (keys.d)
+			vel.sub(right);
+		if (keys[' '])
+			vel.y += 0.05;
+		
+		
+		if(vel.length() > 0.25)
+			vel.normalize().multiplyScalar(0.25);
+		
+		const targetPosition = new T.Vector3();
+		const targetVector = new T.Vector3();
+		targetVector.copy(vel).normalize();
+		targetPosition.copy(fish[0].position).add(targetVector);
+		
+		fish[0].lookAt(targetPosition);
+		
+		fish[0].position.add(vel);
+		vel.multiplyScalar(1.0 - timeDelta * 6.0);
+		
+		
+		if(fish[0].position.length() > 24.5){
+			const fishPosition = new T.Vector3();
+			fishPosition.copy(fish[0].position).normalize().multiplyScalar(24.5)
+			
+			fish[0].position.set(fishPosition.x, fishPosition.y, fishPosition.z);
+		}
+		
 		let dir = new T.Vector3(main_camera.position.x - fish[0].position.x, 0.0, main_camera.position.z - fish[0].position.z);
 		let k = dir.length();
 		
@@ -663,16 +692,23 @@ function animate(timestamp) {
 		
 		main_camera.position.sub(dir);
 		main_camera.lookAt(fish[0].position);
+	
+		camvel.copy(right).multiplyScalar(50.0);
+		
+		if (keys.arrowleft)
+			main_camera.position.add(camvel);
+		if (keys.arrowright)
+			main_camera.position.sub(camvel);
+		
+		
+		if(main_camera.position.length() > 24.5){
+			const fishPosition = new T.Vector3();
+			fishPosition.copy(main_camera.position).normalize().multiplyScalar(24.5)
+			
+			main_camera.position.set(fishPosition.x, fishPosition.y, fishPosition.z);
+		}
 		
 	}
-	
-	
-	camvel.copy(right).multiplyScalar(50.0);
-	
-	if (keys.arrowleft)
-		main_camera.position.add(camvel);
-	if (keys.arrowright)
-		main_camera.position.sub(camvel);
 	
 	
 	// do fish logic
