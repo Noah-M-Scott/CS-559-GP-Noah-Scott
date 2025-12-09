@@ -4,7 +4,7 @@ import * as T from "./libs/CS559-Three/build/three.module.js";
 import { OBJLoader } from "./libs/CS559-Three/examples/jsm/loaders/OBJLoader.js";
 
 let wid = 1280; // window.innerWidth;
-let ht = 720; // window.innerHeight;
+let ht = 720*(4/5); // window.innerHeight;
 let renderer = new T.WebGLRenderer({preserveDrawingBuffer:true});
 renderer.setSize(wid, ht);
 renderer.shadowMap.enabled = true;
