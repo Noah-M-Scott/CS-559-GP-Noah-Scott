@@ -256,7 +256,7 @@ const keys = {
     a: false,
     s: false,
     d: false,
-	' ': false,
+	arrowup: false,
 	enter: false,
 	arrowleft: false,
 	arrowright: false
@@ -651,7 +651,7 @@ function animate(timestamp) {
 			vel.add(right);
 		if (keys.d)
 			vel.sub(right);
-		if (keys[' '])
+		if (keys.arrowup)
 			vel.y += 0.05;
 		
 		
