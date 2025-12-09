@@ -1,6 +1,6 @@
 // @ts-check
 
-import * as T from "CS-559-GP-Noah-Scott/libs/CS559-Three/build/three.module.js";
+import * as T from "./libs/CS559-Three/build/three.module.js";
 import { OBJLoader } from "CS-559-GP-Noah-Scott/libs/CS559-Three/examples/jsm/loaders/OBJLoader.js";
 
 let wid = 1280; // window.innerWidth;
